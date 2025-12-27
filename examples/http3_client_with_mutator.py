@@ -606,7 +606,8 @@ if __name__ == "__main__":
     if uvloop is not None:
         uvloop.install()
 
-    # TODO: 0. Add Mutator argument parsing, mutator initialization, mutator param in main().
+    # TODO: 0. Add Mutator argument parsing, mutator initialization,
+    # mutator param in main().
     asyncio.run(
         main(
             configuration=configuration,

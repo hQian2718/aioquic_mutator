@@ -1,5 +1,7 @@
-from aioquic.tls import ClientHello, ServerHello
 import json
+
+from aioquic.tls import ClientHello, ServerHello
+
 MUTATIONS_FORMAT = {
     "identity": [],
     "remove_field": ["field_name"],
@@ -54,7 +56,7 @@ class Mutator:
     """
     def __init__(self, mutation_params: list[dict[str, str | dict[str, str]]]):
         self.mutation_params = mutation_params
-    
+
     def mutate_client_hello(self, client_hello: ClientHello) -> ClientHello:
         """
         Mutate the ClientHello message based on mutation_params.
@@ -62,7 +64,7 @@ class Mutator:
         for mutation in self.mutation_params:
             if mutation["target"] != "client":
                 continue
-            
+
             mutation_type = mutation["mutation_type"]
             fields = mutation["fields"]
             if mutation_type == "remove_field":
@@ -87,7 +89,7 @@ class Mutator:
         for mutation in self.mutation_params:
             if mutation["target"] != "server":
                 continue
-            
+
             mutation_type = mutation["mutation_type"]
             fields = mutation["fields"]
             if mutation_type == "remove_field":
@@ -103,7 +105,7 @@ class Mutator:
                 pass  # No changes
             # Additional mutation types can be implemented here
         return server_hello  # Return mutated ServerHello
-    
+
     @staticmethod
     def parse_mutation_params(param_str: str) -> list[dict[str, str | dict[str, str]]]:
         """
@@ -121,7 +123,7 @@ class Mutator:
                 "<field_name2>": "<value2>",
                 ...
             }
-        } 
+        }
         """
 
         param_json = json.loads(param_str)
@@ -141,36 +143,28 @@ class Mutator:
             required_fields = MUTATIONS_FORMAT[mutation_type]
             for field in required_fields:
                 if field not in fields:
-                    raise ValueError(f"Missing required field '{field}' for mutation type '{mutation_type}'")
+                    raise ValueError(f"Missing required field '{field}' "
+                                     f"for mutation type '{mutation_type}'")
                 if field == "field_name" and fields[field] not in ALLOWED_FIELD_NAMES:
                     raise ValueError(f"Invalid field name: {fields[field]}")
                 if field == "packet_type" and fields[field] not in ALLOWED_PACKET_TYPES:
                     raise ValueError(f"Invalid packet type: {fields[field]}")
-            
+
             mutation_params["mutation_type"] = mutation_type
             mutation_params["target"] = target
             mutation_params["fields"] = fields
             mutation_list.append(mutation_params)
-        
+
         return mutation_list
-            
+
 def main():
     # Test parsing function
     test_param_str = '''
     [
         {
-            "mutation": "remove_field",
+            "mutation": "identity",
             "target": "client",
             "fields": {
-                "field_name": "alpn_protocols"
-            }
-        },
-        {
-            "mutation": "modify_field",
-            "target": "server", 
-            "fields": {
-                "field_name": "random",
-                "new_value": "deadbeef"
             }
         }
     ]
@@ -179,8 +173,10 @@ def main():
         mutations = Mutator.parse_mutation_params(test_param_str)
         print("Parsed mutation parameters successfully:")
         mutator = Mutator(mutations)
+        mutator.mutate_client_hello(None)
+
     except ValueError as e:
-        print(f"Error parsing mutation parameters: {e}")    
+        print(f"Error parsing mutation parameters: {e}")
 
 if __name__ == "__main__":
     main()
