@@ -1551,6 +1551,7 @@ class Context:
         else:
             server_name = None
 
+        # Create Client Hello
         hello = ClientHello(
             random=self.client_random,
             legacy_session_id=self.legacy_session_id,

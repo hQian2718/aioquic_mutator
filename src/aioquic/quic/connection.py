@@ -1279,6 +1279,9 @@ class QuicConnection:
     def _connect(self, now: float) -> None:
         """
         Start the client handshake.
+
+        This is the code that we will modify in Extremal Testing
+        In order to send malformed packets during the handshake.
         """
         assert self._is_client
 
@@ -1298,8 +1301,10 @@ class QuicConnection:
             )
 
         self._close_at = now + self._idle_timeout()
+        # Initialize TLS context
         self._initialize(self._peer_cid.cid)
-
+        # Uses TLS context to start handshake
+        # This method sends the client hello
         self.tls.handle_message(b"", self._crypto_buffers)
         self._push_crypto_data()
 
