@@ -65,6 +65,8 @@ async def connect(
         configuration = QuicConfiguration(is_client=True)
     if configuration.server_name is None:
         configuration.server_name = host
+
+    # TODO: 2. Add Mutator parameter and pass it to QuicConnection.
     connection = QuicConnection(
         configuration=configuration,
         session_ticket_handler=session_ticket_handler,
