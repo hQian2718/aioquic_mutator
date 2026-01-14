@@ -9,6 +9,7 @@ from aioquic import tls
 from aioquic.buffer import Buffer, BufferReadError
 from aioquic.quic.configuration import QuicConfiguration
 from aioquic.tls import (
+    AlertBadCertificate,
     Certificate,
     CertificateRequest,
     CertificateVerify,
@@ -45,7 +46,8 @@ from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 
-# from mutator.mutator import Mutator
+from mutator.mutator import Mutator
+
 from .utils import (
     SERVER_CACERTFILE,
     SERVER_CERTFILE,
@@ -850,9 +852,44 @@ class ContextTest(TestCase):
         second_handshake()
         second_handshake_bad_binder()
         second_handshake_bad_pre_shared_key()
-    """
+
+    def test_handshake_with_identity_mutator_on_client(self):
+        mutation_params = [
+            {
+                "mutation_type": "identity",
+                "target": "client",
+                "fields": {},
+            }
+        ]
+        mutator = Mutator(mutation_params)
+        client = self.create_client(mutator=mutator)
+        server = self.create_server()
+
+        self._handshake(client, server)
+
+        # check ALPN matches
+        self.assertEqual(client.alpn_negotiated, None)
+        self.assertEqual(server.alpn_negotiated, None)
+
+    def test_handshake_with_identity_mutator(self):
+        mutation_params = [
+            {
+                "mutation_type": "identity",
+                "target": "client",
+                "fields": {},
+            }
+        ]
+        mutator = Mutator(mutation_params)
+        client = self.create_client(mutator=mutator)
+        server = self.create_server()
+
+        self._handshake(client, server)
+
+        # check ALPN matches
+        self.assertEqual(client.alpn_negotiated, None)
+        self.assertEqual(server.alpn_negotiated, None)
+
     def test_client_hello_with_mutator_remove_field(self):
-        Test that mutator removes server_name from ClientHello
         mutation_params = [
             {
                 "mutation_type": "remove_field",
@@ -862,30 +899,13 @@ class ContextTest(TestCase):
         ]
         mutator = Mutator(mutation_params)
         client = self.create_client(mutator=mutator, server_name="example.com")
+        server = self.create_server()
 
-        client_buf = create_buffers()
-        client.handle_message(b"", client_buf)
-        self.assertEqual(client.state, State.CLIENT_EXPECT_SERVER_HELLO)
-        server_input = merge_buffers(client_buf)
+        # without providing the server name, the handshake should fail.
+        with self.assertRaises(AlertBadCertificate):
+            self._handshake(client, server)
 
-        # #region agent log
-        import json
-        with open('./../.cursor/debug.log', 'a') as f:
-            f.write(json.dumps({"sessionId":"debug-session","runId":"run2","hypothesisId":"FIX","location":"test_tls.py:869","message":"server_input before parsing","data":{"len":len(server_input),"first_byte":server_input[0] if len(server_input) > 0 else None,"expected_handshake_type":tls.HandshakeType.CLIENT_HELLO},"timestamp":1733456789002}) + '\n')  # noqa: E501
-        # #endregion
-
-        # Parse the ClientHello to verify server_name is removed
-        # merge_buffers returns the handshake message starting with handshake type byte
-        hello_buf = Buffer(data=server_input)
-        hello = pull_client_hello(hello_buf)
-
-        # #region agent log
-        with open('./../.cursor/debug.log', 'a') as f:
-            f.write(json.dumps({"sessionId":"debug-session","runId":"run2","hypothesisId":"FIX","location":"test_tls.py:875","message":"hello parsed successfully","data":{"server_name":hello.server_name},"timestamp":1733456789003}) + '\n')
-        # #endregion
-
-        self.assertIsNone(hello.server_name)
-
+    """
     def test_client_hello_with_mutator_modify_field(self):
         Test that mutator modifies alpn_protocols in ClientHello
         mutation_params = [
