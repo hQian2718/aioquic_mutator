@@ -1,7 +1,7 @@
 import asyncio
 import os
 from functools import partial
-from typing import Callable, Optional, Text, Union, cast
+from typing import TYPE_CHECKING, Callable, Optional, Text, Union, cast
 
 from ..buffer import Buffer
 from ..quic.configuration import SMALLEST_MAX_DATAGRAM_SIZE, QuicConfiguration
@@ -15,7 +15,6 @@ from ..quic.packet import (
 from ..quic.retry import QuicRetryTokenHandler
 from ..tls import SessionTicketFetcher, SessionTicketHandler
 from .protocol import QuicConnectionProtocol, QuicStreamHandler
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from mutator.mutator import Mutator

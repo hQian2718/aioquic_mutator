@@ -1,13 +1,12 @@
 import asyncio
 import socket
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator, Callable, Optional, cast
+from typing import TYPE_CHECKING, AsyncGenerator, Callable, Optional, cast
 
 from ..quic.configuration import QuicConfiguration
 from ..quic.connection import QuicConnection, QuicTokenHandler
 from ..tls import SessionTicketHandler
 from .protocol import QuicConnectionProtocol, QuicStreamHandler
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from mutator.mutator import Mutator

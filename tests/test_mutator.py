@@ -145,7 +145,7 @@ class MutatorTest(TestCase):
         self.assertEqual(mutated.cipher_suite, 999)
 
     def test_mutator_target_filtering(self):
-        """Test that client mutations only affect ClientHello and 
+        """Test that client mutations only affect ClientHello and
         server mutations only affect ServerHello"""
         # Create mutator with client mutation
         client_mutator = create_mutator("remove_field",
@@ -180,7 +180,7 @@ class MutatorTest(TestCase):
         """Test mutator with multiple mutation steps"""
         mutation_params = [
             {"mutation_type": "remove_field",
-            "target": "client", 
+            "target": "client",
             "fields": {"field_name": "server_name"}
             },
             {"mutation_type": "modify_field",
