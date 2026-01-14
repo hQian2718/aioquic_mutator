@@ -1254,6 +1254,7 @@ class Context:
         max_early_data: Optional[int] = None,
         server_name: Optional[str] = None,
         verify_mode: Optional[int] = None,
+        mutator: Optional[Any] = None,
     ):
         # configuration
         self._alpn_protocols = alpn_protocols
@@ -1332,6 +1333,7 @@ class Context:
         self._enc_key: Optional[bytes] = None
         self._dec_key: Optional[bytes] = None
         self.__logger = logger
+        self._mutator = mutator
 
         self._ec_private_keys: list[ec.EllipticCurvePrivateKey] = []
         self._x25519_private_key: Optional[x25519.X25519PrivateKey] = None
@@ -1612,6 +1614,10 @@ class Context:
 
         self._key_schedule_proxy = KeyScheduleProxy(self._cipher_suites)
         self._key_schedule_proxy.extract(None)
+
+        # Apply mutations if mutator is provided
+        if self._mutator is not None:
+            hello = self._mutator.mutate_client_hello(hello)
 
         with push_message(self._key_schedule_proxy, output_buf):
             push_client_hello(output_buf, hello)
@@ -2005,6 +2011,11 @@ class Context:
             pre_shared_key=pre_shared_key,
             supported_version=supported_version,
         )
+
+        # Apply mutations if mutator is provided
+        if self._mutator is not None:
+            hello = self._mutator.mutate_server_hello(hello)
+
         with push_message(self.key_schedule, initial_buf):
             push_server_hello(initial_buf, hello)
         self.key_schedule.extract(shared_key)

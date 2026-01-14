@@ -1,12 +1,15 @@
 import asyncio
 import socket
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator, Callable, Optional, cast
+from typing import TYPE_CHECKING, AsyncGenerator, Callable, Optional, cast
 
 from ..quic.configuration import QuicConfiguration
 from ..quic.connection import QuicConnection, QuicTokenHandler
 from ..tls import SessionTicketHandler
 from .protocol import QuicConnectionProtocol, QuicStreamHandler
+
+if TYPE_CHECKING:
+    from mutator.mutator import Mutator
 
 __all__ = ["connect"]
 
@@ -23,6 +26,7 @@ async def connect(
     token_handler: Optional[QuicTokenHandler] = None,
     wait_connected: bool = True,
     local_port: int = 0,
+    mutator: Optional["Mutator"] = None,
 ) -> AsyncGenerator[QuicConnectionProtocol, None]:
     """
     Connect to a QUIC server at the given `host` and `port`.
@@ -66,11 +70,11 @@ async def connect(
     if configuration.server_name is None:
         configuration.server_name = host
 
-    # TODO: 2. Add Mutator parameter and pass it to QuicConnection.
     connection = QuicConnection(
         configuration=configuration,
         session_ticket_handler=session_ticket_handler,
         token_handler=token_handler,
+        mutator=mutator,
     )
 
     # explicitly enable IPv4/IPv6 dual stack

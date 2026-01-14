@@ -68,3 +68,6 @@ known-third-party = ["aioquic"]
 
 [tool.setuptools.dynamic]
 version = {attr = "aioquic.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

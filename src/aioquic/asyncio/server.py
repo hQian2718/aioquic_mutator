@@ -1,7 +1,7 @@
 import asyncio
 import os
 from functools import partial
-from typing import Callable, Optional, Text, Union, cast
+from typing import TYPE_CHECKING, Callable, Optional, Text, Union, cast
 
 from ..buffer import Buffer
 from ..quic.configuration import SMALLEST_MAX_DATAGRAM_SIZE, QuicConfiguration
@@ -16,6 +16,9 @@ from ..quic.retry import QuicRetryTokenHandler
 from ..tls import SessionTicketFetcher, SessionTicketHandler
 from .protocol import QuicConnectionProtocol, QuicStreamHandler
 
+if TYPE_CHECKING:
+    from mutator.mutator import Mutator
+
 __all__ = ["serve"]
 
 
@@ -29,6 +32,7 @@ class QuicServer(asyncio.DatagramProtocol):
         session_ticket_handler: Optional[SessionTicketHandler] = None,
         retry: bool = False,
         stream_handler: Optional[QuicStreamHandler] = None,
+        mutator: Optional["Mutator"] = None,
     ) -> None:
         self._configuration = configuration
         self._create_protocol = create_protocol
@@ -37,6 +41,7 @@ class QuicServer(asyncio.DatagramProtocol):
         self._session_ticket_fetcher = session_ticket_fetcher
         self._session_ticket_handler = session_ticket_handler
         self._transport: Optional[asyncio.DatagramTransport] = None
+        self._mutator = mutator
 
         self._stream_handler = stream_handler
 
@@ -128,6 +133,7 @@ class QuicServer(asyncio.DatagramProtocol):
                 retry_source_connection_id=retry_source_connection_id,
                 session_ticket_fetcher=self._session_ticket_fetcher,
                 session_ticket_handler=self._session_ticket_handler,
+                mutator=self._mutator,
             )
             protocol = self._create_protocol(
                 connection, stream_handler=self._stream_handler
@@ -176,6 +182,7 @@ async def serve(
     session_ticket_handler: Optional[SessionTicketHandler] = None,
     retry: bool = False,
     stream_handler: QuicStreamHandler = None,
+    mutator: Optional["Mutator"] = None,
 ) -> QuicServer:
     """
     Start a QUIC server at the given `host` and `port`.
@@ -212,6 +219,7 @@ async def serve(
             session_ticket_handler=session_ticket_handler,
             retry=retry,
             stream_handler=stream_handler,
+            mutator=mutator,
         ),
         local_addr=(host, port),
     )
