@@ -984,11 +984,11 @@ class ContextTest(TestCase):
         hello_buf = Buffer(data=initial_buf_data)
         hello = pull_server_hello(hello_buf)
         self.assertEqual(hello.cipher_suite, 0x1301)
- """  # noqa: E501
+
 
     def test_handshake_with_mutator_identity(self):
-        """Test that handshake completes successfully with identity
-        mutator (no changes)"""
+        Test that handshake completes successfully with identity
+        mutator (no changes)
         mutation_params = [
             {"mutation_type": "identity", "target": "client", "fields": {}},
             {"mutation_type": "identity", "target": "server", "fields": {}},
@@ -1011,7 +1011,7 @@ class ContextTest(TestCase):
         )
 
     def test_handshake_with_mutator_removed_field(self):
-        """Test handshake behavior when mutator removes a non-critical field"""
+        # Test handshake behavior when mutator removes a non-critical field
         # Remove server_name which is non-critical for handshake
         mutation_params = [
             {
@@ -1031,6 +1031,7 @@ class ContextTest(TestCase):
         self.assertEqual(client._dec_key, server._enc_key)
         self.assertEqual(client._enc_key, server._dec_key)
 
+"""  # noqa: E501
 
 class TlsTest(TestCase):
     def test_pull_block_incomplete_read(self):
