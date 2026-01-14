@@ -27,6 +27,7 @@ from aioquic.quic.events import QuicEvent
 from aioquic.quic.logger import QuicFileLogger
 from aioquic.quic.packet import QuicProtocolVersion
 from aioquic.tls import CipherSuite, SessionTicket
+
 from mutator.mutator import Mutator
 
 try:

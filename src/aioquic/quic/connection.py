@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from enum import Enum
 from functools import partial
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Deque,
@@ -23,7 +24,6 @@ from ..buffer import (
     BufferReadError,
     size_uint_var,
 )
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from mutator.mutator import Mutator

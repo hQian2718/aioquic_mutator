@@ -1614,11 +1614,11 @@ class Context:
 
         self._key_schedule_proxy = KeyScheduleProxy(self._cipher_suites)
         self._key_schedule_proxy.extract(None)
-        
+
         # Apply mutations if mutator is provided
         if self._mutator is not None:
             hello = self._mutator.mutate_client_hello(hello)
-        
+
         with push_message(self._key_schedule_proxy, output_buf):
             push_client_hello(output_buf, hello)
 
@@ -2011,11 +2011,11 @@ class Context:
             pre_shared_key=pre_shared_key,
             supported_version=supported_version,
         )
-        
+
         # Apply mutations if mutator is provided
         if self._mutator is not None:
             hello = self._mutator.mutate_server_hello(hello)
-        
+
         with push_message(self.key_schedule, initial_buf):
             push_server_hello(initial_buf, hello)
         self.key_schedule.extract(shared_key)
