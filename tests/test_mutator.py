@@ -89,7 +89,8 @@ class MutatorTest(TestCase):
 
     def test_mutator_remove_field_client(self):
         """Test removing fields from ClientHello"""
-        mutator = create_mutator("remove_field", "client", {"field_name": "server_name"})
+        mutator = create_mutator(
+            "remove_field", "client", {"field_name": "server_name"})
         hello = ClientHello(
             random=b"test" * 8,
             legacy_session_id=b"session",
