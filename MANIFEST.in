@@ -1,7 +1,11 @@
 exclude .readthedocs.yaml
 include LICENSE
+include uv.lock
 recursive-include docs *.py *.rst *.svg Makefile
 recursive-include examples *.css *.html *.py *.rst *.txt
 recursive-include requirements *.txt
 recursive-include scripts *.json *.py
 recursive-include tests *.bin *.pem *.py
+recursive-include docker Dockerfile *.sh
+recursive-include docs *.md
+
