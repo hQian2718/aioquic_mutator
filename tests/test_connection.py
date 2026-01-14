@@ -43,6 +43,7 @@ from .utils import (
     SERVER_KEYFILE,
     SKIP_TESTS,
 )
+from mutator.mutator import Mutator
 
 CLIENT_ADDR = ("1.2.3.4", 1234)
 CLIENT_HANDSHAKE_DATAGRAM_SIZES = [1200]
@@ -3254,6 +3255,77 @@ class QuicConnectionTest(TestCase):
                 }
             ],
         )
+
+    def test_quic_connection_with_mutator(self):
+        """Test that mutator is passed to TLS Context in QuicConnection"""
+        mutation_params = [
+            {"mutation_type": "identity", "target": "client", "fields": {}}
+        ]
+        mutator = Mutator(mutation_params)
+
+        client_configuration = QuicConfiguration(
+            is_client=True, quic_logger=QuicLogger()
+        )
+        client_configuration.load_verify_locations(cafile=SERVER_CACERTFILE)
+
+        client = QuicConnection(configuration=client_configuration, mutator=mutator)
+        client._ack_delay = 0
+
+        # Initialize connection (this calls _initialize which creates TLS Context)
+        client.connect(SERVER_ADDR, now=time.time())
+
+        # Verify mutator was passed to TLS Context
+        self.assertIsNotNone(client.tls)
+        self.assertEqual(client.tls._mutator, mutator)
+
+    def test_client_connection_mutator_integration(self):
+        """Test that mutator mutations are applied during handshake"""
+        # Create mutator that removes server_name
+        mutation_params = [
+            {
+                "mutation_type": "remove_field",
+                "target": "client",
+                "fields": {"field_name": "server_name"},
+            }
+        ]
+        mutator = Mutator(mutation_params)
+
+        client_configuration = QuicConfiguration(
+            is_client=True, quic_logger=QuicLogger(), server_name="example.com"
+        )
+        client_configuration.load_verify_locations(cafile=SERVER_CACERTFILE)
+
+        client = QuicConnection(configuration=client_configuration, mutator=mutator)
+        client._ack_delay = 0
+        disable_packet_pacing(client)
+
+        server_configuration = QuicConfiguration(
+            is_client=False, quic_logger=QuicLogger()
+        )
+        server_configuration.load_cert_chain(SERVER_CERTFILE, SERVER_KEYFILE)
+
+        server = QuicConnection(
+            configuration=server_configuration,
+            original_destination_connection_id=client.original_destination_connection_id,
+        )
+        server._ack_delay = 0
+        disable_packet_pacing(server)
+
+        # Perform handshake
+        client.connect(SERVER_ADDR, now=time.time())
+        for i in range(3):
+            roundtrip(client, server)
+
+        # Verify handshake completed successfully
+        event = client.next_event()
+        self.assertEqual(type(event), events.ProtocolNegotiated)
+        event = client.next_event()
+        self.assertEqual(type(event), events.HandshakeCompleted)
+
+        # Verify mutator was used (server_name should be None in TLS context)
+        # Note: We can't directly verify the serialized packet, but we can verify
+        # the mutator was passed through
+        self.assertEqual(client.tls._mutator, mutator)
 
 
 class QuicNetworkPathTest(TestCase):

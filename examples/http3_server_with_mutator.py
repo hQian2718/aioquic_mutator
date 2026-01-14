@@ -25,6 +25,7 @@ from aioquic.quic.configuration import QuicConfiguration
 from aioquic.quic.events import DatagramFrameReceived, ProtocolNegotiated, QuicEvent
 from aioquic.quic.logger import QuicFileLogger
 from aioquic.tls import SessionTicket
+from mutator.mutator import Mutator
 
 try:
     import uvloop
@@ -486,6 +487,7 @@ async def main(
     configuration: QuicConfiguration,
     session_ticket_store: SessionTicketStore,
     retry: bool,
+    mutator: Optional[Mutator] = None,
 ) -> None:
     await serve(
         host,
@@ -495,6 +497,7 @@ async def main(
         session_ticket_fetcher=session_ticket_store.pop,
         session_ticket_handler=session_ticket_store.add,
         retry=retry,
+        mutator=mutator,
     )
     await asyncio.Future()
 
@@ -567,6 +570,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "-v", "--verbose", action="store_true", help="increase logging verbosity"
     )
+    parser.add_argument(
+        "--mutation",
+        type=str,
+        help="JSON string specifying mutation parameters for TLS hello messages",
+    )
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -607,6 +615,15 @@ if __name__ == "__main__":
     if uvloop is not None:
         uvloop.install()
 
+    # Initialize mutator if mutation parameter is provided
+    mutator = None
+    if args.mutation:
+        try:
+            mutation_params = Mutator.parse_mutation_params(args.mutation)
+            mutator = Mutator(mutation_params)
+        except ValueError as e:
+            raise Exception(f"Invalid mutation parameters: {e}")
+
     try:
         asyncio.run(
             main(
@@ -615,6 +632,7 @@ if __name__ == "__main__":
                 configuration=configuration,
                 session_ticket_store=SessionTicketStore(),
                 retry=args.retry,
+                mutator=mutator,
             )
         )
     except KeyboardInterrupt:

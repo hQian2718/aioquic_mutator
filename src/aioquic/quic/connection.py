@@ -23,6 +23,10 @@ from ..buffer import (
     BufferReadError,
     size_uint_var,
 )
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from mutator.mutator import Mutator
 from . import events
 from .configuration import SMALLEST_MAX_DATAGRAM_SIZE, QuicConfiguration
 from .congestion.base import K_GRANULARITY
@@ -254,6 +258,7 @@ class QuicConnection:
         session_ticket_fetcher: Optional[tls.SessionTicketFetcher] = None,
         session_ticket_handler: Optional[tls.SessionTicketHandler] = None,
         token_handler: Optional[QuicTokenHandler] = None,
+        mutator: Optional["Mutator"] = None,
     ) -> None:
         assert configuration.max_datagram_size >= SMALLEST_MAX_DATAGRAM_SIZE, (
             "The smallest allowed maximum datagram size is "
@@ -413,6 +418,7 @@ class QuicConnection:
         self._session_ticket_fetcher = session_ticket_fetcher
         self._session_ticket_handler = session_ticket_handler
         self._token_handler = token_handler
+        self._mutator = mutator
 
         # frame handlers
         self.__frame_handlers = {
@@ -1452,6 +1458,7 @@ class QuicConnection:
             max_early_data=None if self._is_client else MAX_EARLY_DATA,
             server_name=self._configuration.server_name,
             verify_mode=self._configuration.verify_mode,
+            mutator=self._mutator,
         )
         self.tls.certificate = self._configuration.certificate
         self.tls.certificate_chain = self._configuration.certificate_chain

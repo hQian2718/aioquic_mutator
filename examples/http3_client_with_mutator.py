@@ -27,6 +27,7 @@ from aioquic.quic.events import QuicEvent
 from aioquic.quic.logger import QuicFileLogger
 from aioquic.quic.packet import QuicProtocolVersion
 from aioquic.tls import CipherSuite, SessionTicket
+from mutator.mutator import Mutator
 
 try:
     import uvloop
@@ -361,6 +362,7 @@ async def main(
     local_port: int,
     key_update: bool,
     zero_rtt: bool,
+    mutator: Optional[Mutator] = None,
 ) -> None:
     # parse URL
     parsed = urlparse(urls[0])
@@ -392,7 +394,6 @@ async def main(
         _p = _p._replace(netloc="{}:{}".format(_host, _port))
         _p = urlparse(_p.geturl())
         urls[i] = _p.geturl()
-    # TODO: 1. Add Mutator parameter in connect() call.
     async with connect(
         host,
         port,
@@ -401,6 +402,7 @@ async def main(
         session_ticket_handler=save_session_ticket,
         local_port=local_port,
         wait_connected=not zero_rtt,
+        mutator=mutator,
     ) as client:
         client = cast(HttpClient, client)
         client.key_update = key_update
@@ -552,6 +554,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "--zero-rtt", action="store_true", help="try to send requests using 0-RTT"
     )
+    parser.add_argument(
+        "--mutation",
+        type=str,
+        help="JSON string specifying mutation parameters for TLS hello messages",
+    )
 
     args = parser.parse_args()
 
@@ -606,8 +613,15 @@ if __name__ == "__main__":
     if uvloop is not None:
         uvloop.install()
 
-    # TODO: 0. Add Mutator argument parsing, mutator initialization,
-    # mutator param in main().
+    # Initialize mutator if mutation parameter is provided
+    mutator = None
+    if args.mutation:
+        try:
+            mutation_params = Mutator.parse_mutation_params(args.mutation)
+            mutator = Mutator(mutation_params)
+        except ValueError as e:
+            raise Exception(f"Invalid mutation parameters: {e}")
+
     asyncio.run(
         main(
             configuration=configuration,
@@ -618,5 +632,6 @@ if __name__ == "__main__":
             local_port=args.local_port,
             key_update=args.key_update,
             zero_rtt=args.zero_rtt,
+            mutator=mutator,
         )
     )

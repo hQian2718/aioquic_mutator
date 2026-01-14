@@ -5,6 +5,7 @@
 .eggs
 .mypy_cache
 .vscode
+.cursor
 /build
 /dist
 /docs/_build

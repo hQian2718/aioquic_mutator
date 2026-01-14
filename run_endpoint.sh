@@ -103,3 +103,6 @@ elif [ "$ROLE" = "server" ]; then
         $LOG_PARAMS \
         $SERVER_PARAMS 2>> /logs/stderr.log
 fi
+
+// mutation param
+// add --mutation 'json_string' to the client and server commands
