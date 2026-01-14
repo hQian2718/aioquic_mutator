@@ -1,4 +1,5 @@
 import json
+from typing import TypedDict
 
 from aioquic.tls import ClientHello, ServerHello
 
@@ -33,6 +34,12 @@ ALLOWED_FIELD_NAMES = [
 ]
 
 
+class Mutation(TypedDict):
+    mutation_type: str
+    target: str
+    fields: dict[str, str]
+
+
 class Mutator:
     """
     The Mutator class is responsible for mutating QUIC/TLS messages
@@ -56,7 +63,7 @@ class Mutator:
     'new value'. The fields in QUIC HELLO messages are complex.
     """
 
-    def __init__(self, mutation_params: list[dict[str, str | dict[str, str]]]):
+    def __init__(self, mutation_params: list[Mutation]):
         self.mutation_params = mutation_params
 
     def mutate_client_hello(self, client_hello: ClientHello) -> ClientHello:
@@ -109,7 +116,7 @@ class Mutator:
         return server_hello  # Return mutated ServerHello
 
     @staticmethod
-    def parse_mutation_params(param_str: str) -> list[dict[str, str | dict[str, str]]]:
+    def parse_mutation_params(param_str: str) -> list[Mutation]:
         """
         Parse mutation parameters from a JSON string.
         :param param_str: JSON string representing mutation parameters.
@@ -162,7 +169,7 @@ class Mutator:
         return mutation_list
 
 
-def main():
+def main() -> None:
     # Test parsing function
     test_param_str = """
     [
