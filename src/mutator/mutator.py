@@ -29,8 +29,9 @@ ALLOWED_FIELD_NAMES = [
     "signature_algorithms",
     "supported_groups",
     "supported_versions",
-    "other_extensions"
+    "other_extensions",
 ]
+
 
 class Mutator:
     """
@@ -54,6 +55,7 @@ class Mutator:
     TODO: Currently, there is no validation for the mutation parameter
     'new value'. The fields in QUIC HELLO messages are complex.
     """
+
     def __init__(self, mutation_params: list[dict[str, str | dict[str, str]]]):
         self.mutation_params = mutation_params
 
@@ -143,8 +145,10 @@ class Mutator:
             required_fields = MUTATIONS_FORMAT[mutation_type]
             for field in required_fields:
                 if field not in fields:
-                    raise ValueError(f"Missing required field '{field}' "
-                                     f"for mutation type '{mutation_type}'")
+                    raise ValueError(
+                        f"Missing required field '{field}' "
+                        f"for mutation type '{mutation_type}'"
+                    )
                 if field == "field_name" and fields[field] not in ALLOWED_FIELD_NAMES:
                     raise ValueError(f"Invalid field name: {fields[field]}")
                 if field == "packet_type" and fields[field] not in ALLOWED_PACKET_TYPES:
@@ -157,9 +161,10 @@ class Mutator:
 
         return mutation_list
 
+
 def main():
     # Test parsing function
-    test_param_str = '''
+    test_param_str = """
     [
         {
             "mutation": "identity",
@@ -168,7 +173,7 @@ def main():
             }
         }
     ]
-    '''
+    """
     try:
         mutations = Mutator.parse_mutation_params(test_param_str)
         print("Parsed mutation parameters successfully:")
@@ -177,6 +182,7 @@ def main():
 
     except ValueError as e:
         print(f"Error parsing mutation parameters: {e}")
+
 
 if __name__ == "__main__":
     main()

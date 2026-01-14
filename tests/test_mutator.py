@@ -90,7 +90,8 @@ class MutatorTest(TestCase):
     def test_mutator_remove_field_client(self):
         """Test removing fields from ClientHello"""
         mutator = create_mutator(
-            "remove_field", "client", {"field_name": "server_name"})
+            "remove_field", "client", {"field_name": "server_name"}
+        )
         hello = ClientHello(
             random=b"test" * 8,
             legacy_session_id=b"session",
@@ -117,8 +118,9 @@ class MutatorTest(TestCase):
     def test_mutator_modify_field_client(self):
         """Test modifying fields in ClientHello"""
         mutator = create_mutator(
-            "modify_field", "client",
-            {"field_name": "server_name", "new_value": "modified.com"}
+            "modify_field",
+            "client",
+            {"field_name": "server_name", "new_value": "modified.com"},
         )
         hello = ClientHello(
             random=b"test" * 8,
@@ -148,10 +150,12 @@ class MutatorTest(TestCase):
         """Test that client mutations only affect ClientHello and
         server mutations only affect ServerHello"""
         # Create mutator with client mutation
-        client_mutator = create_mutator("remove_field",
-                                        "client", {"field_name": "server_name"})
-        server_mutator = create_mutator("remove_field", "server",
-                                         {"field_name": "key_share"})
+        client_mutator = create_mutator(
+            "remove_field", "client", {"field_name": "server_name"}
+        )
+        server_mutator = create_mutator(
+            "remove_field", "server", {"field_name": "key_share"}
+        )
 
         client_hello = ClientHello(
             random=b"test" * 8,
@@ -179,13 +183,16 @@ class MutatorTest(TestCase):
     def test_mutator_multiple_mutations(self):
         """Test mutator with multiple mutation steps"""
         mutation_params = [
-            {"mutation_type": "remove_field",
-            "target": "client",
-            "fields": {"field_name": "server_name"}
+            {
+                "mutation_type": "remove_field",
+                "target": "client",
+                "fields": {"field_name": "server_name"},
             },
-            {"mutation_type": "modify_field",
-             "target": "client",
-             "fields": {"field_name": "alpn_protocols", "new_value": ["h3"]}},
+            {
+                "mutation_type": "modify_field",
+                "target": "client",
+                "fields": {"field_name": "alpn_protocols", "new_value": ["h3"]},
+            },
         ]
         mutator = Mutator(mutation_params)
         hello = ClientHello(
