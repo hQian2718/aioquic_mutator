@@ -139,7 +139,6 @@ class Mutator:
         mutation_list = []
 
         for mutation in param_json:
-            mutation_params = {}
             mutation_type = mutation.get("mutation")
             target = mutation.get("target")
             fields = mutation.get("fields", {})
@@ -161,9 +160,11 @@ class Mutator:
                 if field == "packet_type" and fields[field] not in ALLOWED_PACKET_TYPES:
                     raise ValueError(f"Invalid packet type: {fields[field]}")
 
-            mutation_params["mutation_type"] = mutation_type
-            mutation_params["target"] = target
-            mutation_params["fields"] = fields
+            mutation_params: Mutation = {
+                "mutation_type": mutation_type,
+                "target": target,
+                "fields": fields,
+            }
             mutation_list.append(mutation_params)
 
         return mutation_list
