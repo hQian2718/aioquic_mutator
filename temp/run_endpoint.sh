@@ -19,11 +19,13 @@
     if [ -n "$TESTCASE" ]; then
         # interop runner
         case "$TESTCASE" in
-                "extremal_1")
-                CLIENT_PARAMS="--legacy-http --mutation [{"mutation":"remove_field","target":"client","fields":{"field_name":"server_name"}}]"
-                SERVER_PARAMS="--mutation [{"mutation":"remove_field","target":"client","fields":{"field_name":"server_name"}}]"
+            "extremal_1")
+                CLIENT_PARAMS="--legacy-http --mutation [{'mutation':'remove_field','target':'client','fields':{'field_name':'server_name'}}]"
+                SERVER_PARAMS="--mutation [{'mutation':'remove_field','target':'client','fields':{'field_name':'server_name'}}]"
                 ;;
-
+            "handshake")
+                CLIENT_PARAMS="--legacy-http"
+            ;;
             *)
                 exit 127
                 ;;
@@ -79,6 +81,6 @@
             $SERVER_PARAMS 2>> /logs/stderr.log
     fi
 
-    // mutation param
-    // add --mutation 'json_string' to the client and server commands
+    # mutation param
+    # add --mutation 'json_string' to the client and server commands
     
