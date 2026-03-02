@@ -1,5 +1,6 @@
 import argparse
 import asyncio
+import json
 import logging
 import os
 import pickle
@@ -557,8 +558,8 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--mutation",
-        type=str,
-        help="JSON string specifying mutation parameters for TLS hello messages",
+        type=int,
+        help="test_id of the mutation to apply, looked up from /aioquic/temp/tests.json",
     )
 
     args = parser.parse_args()
@@ -616,9 +617,18 @@ if __name__ == "__main__":
 
     # Initialize mutator if mutation parameter is provided
     mutator = None
-    if args.mutation:
+    if args.mutation is not None:
+        tests_file = "/aioquic/temp/tests.json"
+        with open(tests_file, "r", encoding="utf-8") as f:
+            all_tests = json.load(f)
+        test_entry = next(
+            (t for t in all_tests if t["test_id"] == args.mutation), None
+        )
+        if test_entry is None:
+            raise Exception(f"No test found with test_id={args.mutation} in {tests_file}")
         try:
-            mutation_params = Mutator.parse_mutation_params(args.mutation)
+            mutations_str = json.dumps(test_entry["mutations"])
+            mutation_params = Mutator.parse_mutation_params(mutations_str)
             mutator = Mutator(mutation_params)
         except ValueError as e:
             raise Exception(f"Invalid mutation parameters: {e}")
