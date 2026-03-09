@@ -1619,8 +1619,22 @@ class Context:
         if self._mutator is not None:
             hello = self._mutator.mutate_client_hello(hello)
 
+
+        # When pushing the client hello (which includes serialization), the
+        # llm-written mutation may result in field types being changed.
+        # This should have been caught earlier in the mutator validation, 
+        # but as a fallback here, we will let the tester
+        # know that the mutation caused an error.
+
+        # The tester convention is that 127 is the exit code for unsupported
+        # test. So we will use that to indicate mutation error.
+
         with push_message(self._key_schedule_proxy, output_buf):
-            push_client_hello(output_buf, hello)
+            try:
+                push_client_hello(output_buf, hello)
+            except TypeError:
+                raise SystemExit(127, "Failed to serialize ClientHello due to" \
+                "mutation error")
 
         self._set_state(State.CLIENT_EXPECT_SERVER_HELLO)
 
