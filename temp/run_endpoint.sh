@@ -20,12 +20,12 @@
         # interop runner
         case "$TESTCASE" in
                 "extremal_1")
-                CLIENT_PARAMS="--legacy-http --mutation [{\"mutation\":\"remove_field\",\"target\":\"client\",\"fields\":{\"field_name\":\"server_name\"}}]"
-                SERVER_PARAMS="--mutation [{\"mutation\":\"remove_field\",\"target\":\"client\",\"fields\":{\"field_name\":\"server_name\"}}]"
+                CLIENT_PARAMS="--legacy-http --mutation 3"
+                SERVER_PARAMS="--mutation 3"
                 ;;
             "extremal_2")
-                CLIENT_PARAMS="--legacy-http --mutation [{\"mutation\":\"remove_field\",\"target\":\"client\",\"fields\":{\"field_name\":\"server_name\"}}]"
-                SERVER_PARAMS="--mutation [{\"mutation\":\"remove_field\",\"target\":\"client\",\"fields\":{\"field_name\":\"server_name\"}}]"
+                CLIENT_PARAMS="--legacy-http --mutation 4"
+                SERVER_PARAMS="--mutation 4"
                 ;;
             "handshake")
                 CLIENT_PARAMS="--legacy-http"
