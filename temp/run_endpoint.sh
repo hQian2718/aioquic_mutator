@@ -75,6 +75,12 @@
             run_client $REQUESTS
             ;;
         esac
+
+        rc=$?
+        if [ $rc -ne 0 ]; then
+            echo "Client execution failed with return code $rc"
+            exit $rc
+        fi
     elif [ "$ROLE" = "server" ]; then
         echo "Starting server"
         env/bin/python examples/http3_server_with_mutator.py \
@@ -84,6 +90,8 @@
             --verbose \
             $LOG_PARAMS \
             $SERVER_PARAMS 2>> /logs/stderr.log
+        rc=$?
+        exit $rc
     fi
 
     # mutation param

@@ -37,6 +37,11 @@ ALLOWED_FIELD_NAMES = [
 class Mutation(TypedDict):
     mutation_type: str
     target: str
+    # TODO: remove dictionary and use hard_coded fields: field_name
+    #  and new_value (could be left blank if not modify_field)
+    #  new_value can be a variety of types
+    # TODO: change usage in mutate_client_hello and
+    # mutate_server_hello to use hard coded fields
     fields: dict[str, str]
 
 
@@ -148,6 +153,7 @@ class Mutator:
                 raise ValueError(f"Invalid target: {target}")
 
             # Check required fields per mutation type
+            # update mutator usage
             required_fields = MUTATIONS_FORMAT[mutation_type]
             for field in required_fields:
                 if field not in fields:
@@ -163,7 +169,7 @@ class Mutator:
             mutation_params: Mutation = {
                 "mutation_type": mutation_type,
                 "target": target,
-                "fields": fields,
+                # TODO: add new_value to mutation
             }
             mutation_list.append(mutation_params)
 

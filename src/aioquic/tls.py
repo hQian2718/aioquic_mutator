@@ -1632,9 +1632,8 @@ class Context:
         with push_message(self._key_schedule_proxy, output_buf):
             try:
                 push_client_hello(output_buf, hello)
-            except TypeError:
-                raise SystemExit(127, "Failed to serialize ClientHello due to" \
-                "mutation error")
+            except Exception:
+                raise SystemExit(127)
 
         self._set_state(State.CLIENT_EXPECT_SERVER_HELLO)
 

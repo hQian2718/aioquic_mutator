@@ -5,9 +5,6 @@
     "description": "Create invalid mutation to see if client can exit with 127 (unsupported)",
     "tag": "C1",
     "tested_party": "server",
-    "extensions_used": [
-      "server_name"
-    ],
     "mutations": [{
         "mutation": "modify_field",
         "target": "client",
@@ -24,16 +21,33 @@
     "description": "Removes server_name from client hello to test server response",
     "tag": "C1",
     "tested_party": "server",
-    "extensions_used": [
-      "server_name"
-    ],
-    "mutations": [{
-        "mutation": "remove_field",
+    "mutations": [
+      {
+        "mutation": "modify_field",
         "target": "client",
         "fields": {
-            "field_name": "server_name"
+            "field_name": "random",
+            "new_value": "0x12345678123456781234567812345678"
         }
-    }],
+      },
+      {
+        "mutation": "modify_field",
+        "target": "client",
+        "fields": {
+            "field_name": "other_extensions",
+            "new_value": [
+                [
+                  "0x1234",
+                  "0xdeadbeefdeadbeef"
+                ],
+                [
+                  "0x5678",
+                  "0xabcdefabcdefabcd"
+                ]
+            ]
+        }
+      }
+    ],
     "expected_result": "success"
   }
 ]
