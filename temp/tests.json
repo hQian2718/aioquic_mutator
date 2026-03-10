@@ -2,17 +2,18 @@
     {
     "test_id": 3,
     "constraint": "[1.1.1] Some QUIC constraint",
-    "description": "Removes server_name from client hello to test server response",
+    "description": "Create invalid mutation to see if client can exit with 127 (unsupported)",
     "tag": "C1",
     "tested_party": "server",
     "extensions_used": [
       "server_name"
     ],
     "mutations": [{
-        "mutation": "remove_field",
+        "mutation": "modify_field",
         "target": "client",
         "fields": {
-            "field_name": "server_name"
+            "field_name": "key_share",
+            "new_value": "invalid_value"
         }
     }],
     "expected_result": "success"

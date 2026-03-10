@@ -559,7 +559,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--mutation",
         type=int,
-        help="test_id of the mutation to apply, looked up from /aioquic/temp/tests.json",
+        help="test_id of mutation to apply, looked up from /aioquic/temp/tests.json",
     )
 
     args = parser.parse_args()
@@ -618,7 +618,8 @@ if __name__ == "__main__":
     # Initialize mutator if mutation parameter is provided
     mutator = None
     if args.mutation is not None:
-        tests_file = "/aioquic/temp/tests.json"
+        # tests_file = "/aioquic/temp/tests.json"
+        tests_file = "./temp/tests.json"
         with open(tests_file, "r", encoding="utf-8") as f:
             all_tests = json.load(f)
         test_entry = next(
