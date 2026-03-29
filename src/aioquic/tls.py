@@ -8,6 +8,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 from enum import Enum, IntEnum
 from functools import partial
+import sys
 from typing import (
     Any,
     Callable,
@@ -1618,7 +1619,11 @@ class Context:
         # Apply mutations if mutator is provided
         if self._mutator is not None:
             hello = self._mutator.mutate_client_hello(hello)
-
+            # print all fields of the new client hello to stderr for debugging
+            print("Mutated ClientHello:", file=sys.stderr)
+            for field in hello.__dataclass_fields__:
+                value = getattr(hello, field)
+                print(f"  {field}: {value}", file=sys.stderr)
 
         # When pushing the client hello (which includes serialization), the
         # llm-written mutation may result in field types being changed.
