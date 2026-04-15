@@ -8,6 +8,7 @@ MUTATIONS_FORMAT = {
     "remove_field": ["field_name"],
     "modify_field": ["field_name", "new_value"],
     "send_additional_packet": ["packet_type", "packet_content"],
+    "duplicate": ["field_name"],
 }
 
 ALLOWED_PACKET_TYPES = [
@@ -47,6 +48,9 @@ def _parse_bytes(value: Any) -> bytes:
         raise ValueError(
             f"Expected hex string for bytes field, got {type(value).__name__}"
         )
+    # Strip '0x' or '0X' prefix if present, similar to _parse_int
+    if value.startswith(('0x', '0X')):
+        value = value[2:]
     return bytes.fromhex(value)
 
 
@@ -150,6 +154,17 @@ class Mutator:
             elif mutation_type == "modify_field":
                 if hasattr(client_hello, mutation.field_name):
                     setattr(client_hello, mutation.field_name, mutation.new_value)
+            elif mutation_type == "duplicate":
+                # duplicate the field by appending itself to itself.
+                # works on list fields
+                if hasattr(client_hello, mutation.field_name):
+                    current_value = getattr(client_hello, mutation.field_name)
+                    if isinstance(current_value, list):
+                        setattr(
+                            client_hello,
+                            mutation.field_name,
+                            current_value + current_value,
+                        )
             # Additional mutation types can be implemented here
 
         return client_hello

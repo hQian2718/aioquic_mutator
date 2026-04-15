@@ -1618,6 +1618,10 @@ class Context:
 
         # Apply mutations if mutator is provided
         if self._mutator is not None:
+            print("Pre-Mutated ClientHello:", file=sys.stderr)
+            for field in hello.__dataclass_fields__:
+                value = getattr(hello, field)
+                print(f"  {field}: {value}", file=sys.stderr)
             hello = self._mutator.mutate_client_hello(hello)
             # print all fields of the new client hello to stderr for debugging
             print("Mutated ClientHello:", file=sys.stderr)
